@@ -1,15 +1,18 @@
 import java.util.*;
 
-public class OrderTracker{
-	public static void main(String[]args){
+public class OrderTracker {
+
+    public static void main(String[]args){
 		UserInterface ui = new UserInterface();
 		ui.home();
 
 	}
 }
+
 //Once the admin logs in, they will be able to make the needed changes to the customer's tracking page.
 
-class UserInterface{
+// @author Gain Nambeye
+class UserInterface extends UpdateTracking{
 	Scanner tracker = new Scanner(System.in);
 
 	public void home(){
@@ -26,44 +29,51 @@ class UserInterface{
 
 //depending on what value the user/admin enters, this is what will be displayed
 		switch(input){
-			case 1:{ trackProductScreen();}
-			break;
-			case 2: {admin();}
-			break;
-			default: System.out.println("Invalid Input, try again.");
+			case 1 -> { trackProductScreen();}
+			case 2 -> {admin();}
+			default -> System.out.println("Invalid Input, try again.");
 		}
 	}
 	//user is able to see and track the progress of their product
 	public void trackProductScreen(){
-		System.out.println("Enter your tracking code");
-		int code = tracker.nextInt();
+
+		System.out.println("Enter your tracking code,or enter 0 to go back to previous screen");
+		long code = tracker.nextInt();
 		//check if code is valid
-		TrackingBackend  trackingbackend = new TrackingBackend();
-
-		if(TrackingBackend.isValid(code)){
-
-			trackingDetailsScreen(TrackingBackend.getName(), TrackingBackend.getOrderNumber(), TrackingBackend.getShippingStage());
+                String shippingStage;
+                if(code == 0){
+                    home();
+                }
+		if(isValid(code)){
+                    int currentShippingStage = getShippingStage();
+                    shippingStage = switch (currentShippingStage) {
+                        case 1 -> "Loading";
+                        case 2 -> "In transit";
+                        default -> "Delivered";
+                    };
+                    trackingDetailsScreen(getCustomerName(), getOrderNumber(), shippingStage);
 		} else{
 			System.out.println("Code doesnt exist");
 			trackProductScreen();
 		}
-		System.out.print("Enter 0 to go back to previous screen: ");
-		int back = tracker.nextInt();
-		if(back == 0){
-			home();
-		}
+		
 		
 	}
 	//allows the admin to make updates and changes concerning the shipment
 	public void admin(){
-		System.out.println("Enter Password");
-		String password = tracker.next();
+//		System.out.println("Enter Password");
+//		String password = tracker.next();
 		//updates
-		UpdateTracking updatetracking = new UpdateTracking();
 		
-		int trackingCode = tracker.nextInt();
-		String orderNumber = tracker.next();
-		String shippingStage = tracker.next();
+//		int trackingCode = tracker.nextInt();
+                System.out.println("Customer name: " + getCustomerName());
+		System.out.println("Order numer: " + getOrderNumber());
+                String shipStage = switch (getShippingStage()) {
+                        case 1 -> "Loading";
+                        case 2 -> "In transit";
+                        default -> "Delivered";
+                    };
+		System.out.println("Shipping stage: " + shipStage);
 		System.out.println("To update the shipping stage, ");
 		System.out.println("Press 1 for loading");
 		System.out.println("Press 2 for in transit");
@@ -74,18 +84,55 @@ class UserInterface{
 		if(back == 0){
 			home();
 		}else {
-			updatetracking.setShippingStage(back);
+			setShippingStage(back);
 			admin();
 		}
 
 	}
 	//displays the details of the customer as well as their shipping details
-	public void trackingDetailsScreen(String name, String orderNumber, String shippingStatge){
+	public void trackingDetailsScreen(String name, String orderNumber, String shippingStage){
 		System.out.printf("Fullname: %s %n Order Number: %s %n Shipping Stage: %s", name, orderNumber, shippingStage);
-		System.out.print("Enter 0 to go back to previous screen: ");
+                System.out.println("");
+		System.out.println("Enter 0 to go back to previous screen: ");
 		int back = tracker.nextInt();
 		if(back == 0){
 			trackProductScreen();
 		}
 	}
 }
+
+//@ author: Mwiza Chiwale
+class UpdateTracking extends TrackingBackEnd{
+    int shippingStage = 1;
+    
+    public void setShippingStage(int stage){
+        shippingStage = stage;
+    }
+     public int getShippingStage(){
+        return this.shippingStage;
+    }
+    
+    
+}
+
+//@ author: Mwiza Chiwale
+class TrackingBackEnd {
+    String customerName = "Jane Doe";    
+    String orderNumber = "ABC12345";
+
+    long trackingCode = 123456;
+    boolean valid = false;
+    public boolean isValid(long code){
+        if(code == trackingCode){
+            valid = true;
+        }
+        return valid;
+    }
+    public  String getCustomerName(){
+        return this.customerName;
+    }
+    public String getOrderNumber(){
+        return this.orderNumber;
+    }
+}
+
